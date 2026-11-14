@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>采集日历</h1>
+<form class="filters" method="get">
+  <label>市场
+    <select name="market_id" onchange="this.form.submit()">
+      {% for m in markets %}<option value="{{ m.market_id }}" {{ 'selected' if m.market_id==market_id }}>{{ m.market_id }} {{ m.name }}</option>{% endfor %}
+    </select>
+  </label>
+</form>
+<p class="small">真缺数日（应开市但未采齐，已自动排除休市）：
+  {% if missing %}<b style="color:var(--bad)">{{ missing|join('、') }}</b>
+  {% else %}<b style="color:var(--ok)">无</b>{% endif %}
+</p>
+<table class="cal-grid">
+<tr class="dow">{% for d in ['周一','周二','周三','周四','周五','周六','周日'] %}<td>{{ d }}</td>{% endfor %}</tr>
+{% for week in weeks %}
+<tr>
+{% for cell in week %}
+  {% if cell is none %}<td class="closed-cell"></td>
+  {% else %}
+  {% set day, cal = cell %}
+  {% set cls = 'closed-cell' if cal and cal.expected=='closed' else ('done-cell' if cal and cal.collect_status=='done' else ('missing-cell' if cal else '')) %}
+  <td class="{{ cls }}">
+    <b>{{ day.strftime('%m-%d') }}</b><br>
+    {% if cal %}
+      {% if cal.expected == 'closed' %}
+        <span class="badge closed">休市</span><div class="small">{{ cal.close_reason or '' }}</div>
+      {% else %}
+        <span class="badge {{ cal.collect_status }}">{{ cal.collect_status }}</span>
+        <div class="small">应采 {{ cal.expected_count }} / 实采 {{ cal.collected_count }}</div>
+        <form method="post" action="/calendar/collect">
+          <input type="hidden" name="market_id" value="{{ market_id }}">
+          <input type="hidden" name="day" value="{{ day.isoformat() }}">
+          <button class="gray">立即采集/补采</button>
+        </form>
+      {% endif %}
+    {% else %}<span class="small">未排班</span>{% endif %}
+  </td>
+  {% endif %}
+{% endfor %}
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

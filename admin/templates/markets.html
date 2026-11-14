@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>市场管理</h1>
+<table>
+<tr><th>市场ID</th><th>名称</th><th>反爬招式</th><th>地址</th><th>允许价格类型</th><th>启用</th><th>最近一次采集</th></tr>
+{% for r in rows %}
+<tr>
+  <td>{{ r.market_id }}</td><td>{{ r.name }}</td><td><code>{{ r.trick }}</code></td>
+  <td><a href="{{ r.base_url }}" target="_blank">{{ r.base_url }}</a></td>
+  <td>{% for t in r.price_types.split(',') %}<span class="badge verified">{{ type_label[t] }}</span> {% endfor %}</td>
+  <td>
+    <form class="inline" method="post" action="/markets/{{ r.market_id }}/toggle">
+      <button class="gray">{{ '已启用' if r.enabled else '已停用' }}</button>
+    </form>
+  </td>
+  <td>
+    {% set run = runs[r.market_id] %}
+    {% if run %}
+      <span class="badge {{ run.status }}">{{ run.status }}</span>
+      <div class="small">{{ run.started_at }}<br>{{ run.message or '' }}</div>
+    {% else %}<span class="small">未采集</span>{% endif %}
+  </td>
+</tr>
+{% endfor %}
+</table>
+<p class="small">价格类型在 markets 表登记并由 prices 表 CHECK 约束双重把关，批发价/产地价/到岸价无法串写。</p>
+{% endblock %}

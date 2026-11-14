@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>运行总览</h1>
+<div class="cards">
+  <div class="card"><div class="num">{{ stats.prices }}</div><div class="lbl">价格记录总数</div></div>
+  <div class="card"><div class="num" style="color:var(--held)">{{ stats.held }}</div><div class="lbl">扣留待复核价格</div></div>
+  <div class="card"><div class="num" style="color:var(--bad)">{{ stats.anomalies_held }}</div><div class="lbl">待处理异常单</div></div>
+  <div class="card"><div class="num">{{ stats.snapshots }}</div><div class="lbl">原始快照数</div></div>
+  <div class="card"><div class="num" style="color:var(--bad)">{{ stats.runs_failed }}</div><div class="lbl">失败采集任务</div></div>
+</div>
+<h2>四个仿真市场的反爬招式与采集对策</h2>
+<table>
+<tr><th>市场</th><th>花招</th><th>对策</th></tr>
+<tr><td>m1 鑫丰农贸</td><td>每日换自定义字体，源码 PUA 乱码</td><td>浏览器探针渲染 + 模板匹配，每日自动重解映射</td></tr>
+<tr><td>m2 城南农副</td><td>价格画在 Canvas；第二渠道偶发偏差</td><td>连通域切分 OCR + 跨渠道印证，冲突即扣留</td></tr>
+<tr><td>m3 临港果批</td><td>接口签名前端现算，算法按日轮换含诱饵</td><td>枚举页面函数试跑发现签名器，算法不写死</td></tr>
+<tr><td>m4 西山产地</td><td>仅发跨页周报 PDF</td><td>pdfplumber 拆跨页表，续行合并为明细</td></tr>
+</table>
+<p class="small">所有站点均为本地仿真（127.0.0.1:8011-8014），不访问任何真实网站。</p>
+{% endblock %}

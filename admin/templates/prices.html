@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>价格库</h1>
+<form class="filters" method="get">
+  <input type="hidden" name="market_id" value="{{ market_id }}">
+  <label>市场
+    <select name="market_id" onchange="this.form.submit()">
+      {% for m in markets %}<option value="{{ m.market_id }}" {{ 'selected' if m.market_id==market_id }}>{{ m.market_id }} {{ m.name }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>日期 <input type="date" name="day" value="{{ day }}"></label>
+  <label>价格类型
+    <select name="price_type">
+      <option value="">全部</option>
+      {% for t in allowed_types %}<option value="{{ t }}" {{ 'selected' if t==price_type }}>{{ type_label[t] }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>状态
+    <select name="status">
+      <option value="">全部</option>
+      <option value="verified" {{ 'selected' if status=='verified' }}>已验证</option>
+      <option value="held" {{ 'selected' if status=='held' }}>扣留</option>
+    </select>
+  </label>
+  <button type="submit">筛选</button>
+</form>
+<table>
+<tr><th>日期</th><th>商品</th><th>价格类型</th><th>价格</th><th>单位</th><th>状态</th><th>原始快照</th><th>采集时间</th></tr>
+{% for r in rows %}
+<tr>
+  <td>{{ r.day }}</td><td>{{ r.product_code }}</td>
+  <td><span class="badge verified">{{ type_label[r.price_type] }}</span></td>
+  <td><b>{{ '%.2f'|format(r.price) }}</b></td><td>{{ r.unit }}</td>
+  <td><span class="badge {{ r.status }}">{{ r.status }}</span></td>
+  <td>
+    {% if r.file_url %}<a href="{{ r.file_url }}" target="_blank">截图/PDF</a>
+    {% elif r.payload_url %}<a href="{{ r.payload_url }}" target="_blank">报文</a>
+    {% else %}<a href="/media/snapshot?snapshot_id={{ r.snapshot_id }}" target="_blank">#{{ r.snapshot_id }}</a>{% endif %}
+  </td>
+  <td class="small">{{ r.collected_at }}</td>
+</tr>
+{% endfor %}
+</table>
+<p class="small">共 {{ rows|length }} 条（上限 500）。每条价格都带 snapshot_id，可回溯到当时的截图/PDF/原始报文。</p>
+{% endblock %}
